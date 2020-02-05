@@ -29,17 +29,10 @@ const useStyles = makeStyles(theme => ({
     padding: 0
   },
   sticky: {
-    //position: "-webkit-sticky",
     position: "sticky",
     top: 0,
     zIndex: theme.zIndex.appBar + 5
   }
-  // [theme.breakpoints.down("xs")]: {
-  //   container: {
-  //     padding: 0,
-  //     backgroundColor: "orange"
-  //   }
-  // }
 }));
 
 const authCheck = (props, DestinationComponent) => {

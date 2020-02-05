@@ -72,7 +72,7 @@ router.post("/forget-password", async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
+    console.log("ERRRRRRRORR >>>>> ", err);
     return res.status(404).json(err);
   }
 });
