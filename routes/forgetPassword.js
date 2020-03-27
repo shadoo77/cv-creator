@@ -1,9 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const ResetPassword = require("../models/Reset.Password");
 const User = require("../models/User");
-const validateEmailInput = require("../validation/email.input");
+const {
+  validateForgetPassowrd,
+  validateResetPassowrd
+} = require("../validation/reset.password");
 const { mailTemplates } = require("../services/config");
 const sendEmail = require("../services/emailServices");
 
@@ -12,13 +16,12 @@ const sendEmail = require("../services/emailServices");
 // @access Public
 router.post("/forget-password", async (req, res) => {
   const { email } = req.body;
-  const { errors, isValid } = validateEmailInput(req.body);
+  const { errors, isValid } = validateForgetPassowrd(req.body);
   if (!isValid) {
     return res.status(400).json(errors);
   }
   try {
     const user = await User.findOne({ email }).exec();
-
     if (!user) {
       // Could not find email, but always give
       // ambiguous feedback when authenticating"
@@ -52,7 +55,7 @@ router.post("/forget-password", async (req, res) => {
     }
     ////////////////////////////////////////////////////////////
     const resetMail = {
-      from: "kleurrijker.test@gmail.com",
+      from: "info@cv-creator.com",
       to: user.email,
       subject: "Forget password",
       userName: `${user.firstName} ${user.lastName}`,
@@ -61,18 +64,15 @@ router.post("/forget-password", async (req, res) => {
     };
     sendEmail(resetMail, (err, response) => {
       if (err) {
-        console.error("there was an error: ", err);
         errors.notFound =
           "There is something wrong in the server, please try again later.";
         return res.status(404).json(errors);
       } else {
-        console.error("successful response : ", response);
         const success = `The message has sent to ${user.email}, you can follow there the instructions to reset your password .`;
         return res.status(200).json({ success });
       }
     });
   } catch (err) {
-    console.log("ERRRRRRRORR >>>>> ", err);
     return res.status(404).json(err);
   }
 });
@@ -80,71 +80,68 @@ router.post("/forget-password", async (req, res) => {
 // @route  GET api/account/reset-password
 // @desc   Reset password
 // @access Public
-router.get("/reset-password", (req, res) => {
+router.get("/reset-password", async (req, res) => {
   let errors = {};
-  ResetPassword.findOne({
-    token: req.query.resetPasswordToken
-  })
-    .populate({
-      path: "user",
-      model: "account"
+  try {
+    const field = await ResetPassword.findOne({
+      token: req.query.resetPasswordToken
     })
-    .exec()
-    .then(field => {
-      if (!field) {
-        errors.invalid = "Password reset link is invalid or has expired!";
-        return res.status(403).json(errors);
-      }
-      if (field.expires <= Date.now()) {
-        errors.invalid = "Password reset link is invalid or has expired!";
-        return res.status(403).json(errors);
-      }
-      res.status(200).json({
-        userID: field.user._id,
-        name: field.user.name
-      });
-    })
-    .catch(err => {
-      return res.status(404).json(err);
+      .populate({
+        path: "user",
+        model: "users"
+      })
+      .exec();
+    if (!field) {
+      errors.invalid = "Password reset link is invalid or has expired!";
+      return res.status(403).json(errors);
+    }
+    if (field.expires <= Date.now()) {
+      errors.invalid = "Password reset link is invalid or has expired!";
+      return res.status(403).json(errors);
+    }
+    res.status(200).json({
+      userID: field.user._id,
+      name: field.user.firstName
     });
+  } catch (err) {
+    return res.status(404).json(err);
+  }
 });
 
 // @route  POST api/account/reset-password
 // @desc   Reset password
 // @access Public
-router.post("/reset-password", (req, res) => {
+router.post("/reset-password", async (req, res) => {
   const { id, newPassword } = req.body;
   // Call validation function
-  const { errors, isValid } = validateResetPassword(req.body);
+  const { errors, isValid } = validateResetPassowrd(req.body);
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  Account.findById(id)
-    .then(user => {
-      if (!user) {
-        errors.notFound = "Helaas wij hebben uw account niet gevonden!";
-        return res.status(404).json(errors);
-      }
-
-      bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newPassword, salt, (err, hash) => {
-          if (err) throw err;
-          user.account.password = hash;
-          user
-            .save()
-            .then(() =>
-              res.status(200).json({
-                success:
-                  "Super! Uw wachtwoord is gewijzigd , u kunt nu inloggen met uw nieuwe wachtwoord"
-              })
-            )
-            .catch(err => res.status(404).json(err));
-        });
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      errors.notFound = "Account is not found!";
+      return res.status(404).json(errors);
+    }
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(newPassword, salt, (err, hash) => {
+        if (err) throw err;
+        user.password = hash;
+        user
+          .save()
+          .then(() =>
+            res.status(200).json({
+              success:
+                "Super! Your password is changed! , you can now log in with your new password!"
+            })
+          )
+          .catch(err => res.status(404).json(err));
       });
-    })
-    .catch(err => {
-      return res.status(404).json(err);
     });
+  } catch (err) {
+    return res.status(404).json(err);
+  }
 });
 
 module.exports = router;

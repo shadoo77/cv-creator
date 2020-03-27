@@ -36,7 +36,7 @@ function getSteps() {
 
 export default () => {
   const classes = useStyles();
-  const [activeStep, setActiveStep] = React.useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
   const ref1 = useRef();
   const ref2 = useRef();

@@ -1,11 +1,11 @@
-//const isEmpty = require("../services/isEmpty");
+const isEmpty = require("../services/isEmpty");
 const Joi = require("@hapi/joi");
 
-const schema = Joi.object({});
-
-const validateLoginInput = data => {
-  let { email, password } = data;
+module.exports = data => {
+  const { email, password } = data;
   let errors = {};
+
+  const schema = Joi.object({});
 
   email = !isEmpty(email) ? email : "";
   password = !isEmpty(password) ? password : "";
@@ -25,5 +25,3 @@ const validateLoginInput = data => {
     isValid: isEmpty(errors)
   };
 };
-
-module.exports = validateLoginInput;

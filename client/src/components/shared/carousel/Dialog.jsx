@@ -1,11 +1,11 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+//import { makeStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 
-const useStyles = makeStyles({});
+//const useStyles = makeStyles({});
 
 export default props => {
-  const classes = useStyles();
+  //const classes = useStyles();
   const { open, onClose, imageSrc } = props;
 
   const handleClose = () => {

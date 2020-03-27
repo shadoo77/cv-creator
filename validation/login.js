@@ -3,7 +3,6 @@ const isEmpty = require("../services/isEmpty");
 const Joi = require("@hapi/joi");
 
 const validateLoginInput = data => {
-  let { email, password } = data;
   let errors = {};
   const passRegex = /^(?=.*d)(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])[\w!@#$%^&*]{8,}$/;
 
@@ -21,20 +20,27 @@ const validateLoginInput = data => {
   // }
 
   const schema = Joi.object({
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] }
-    }),
-    password: Joi.string().pattern(new RegExp(passRegex))
+    email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+        tlds: { allow: ["com", "net"] }
+      })
+      .required()
+      .messages({ "string.email": "Invalid email address, try again!" }),
+    password: Joi.string()
+      .pattern(new RegExp(passRegex))
+      .required()
+      .messages({ "string.pattern.base": "invalid password!" })
   })
     .with("email", "password")
     .options({ abortEarly: false });
 
-  const { error, value } = schema.validate({
-    password: "dfdfd#fdf",
-    email: "dfhd@kdfdjf.come"
-  });
-  console.log("results joi ::::::: >>>> ", error.details);
+  const { error } = schema.validate(data);
+  if (error) {
+    error.details.forEach(el => {
+      errors[el.context.key] = el.message;
+    });
+  }
 
   return {
     errors,

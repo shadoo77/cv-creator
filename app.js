@@ -13,9 +13,22 @@ app.use(
   })
 );
 app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+
+//access for anywhere on the server
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Access-Token"
+  );
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
+    return res.status(200).json({});
+  }
+  next();
+});
 
 const users = require("./routes/users");
 app.use("/api/user", users);
@@ -34,6 +47,16 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname + "/client/build/index.html"))
   );
 }
+
+app.use((req, res, next) => {
+  const error = new Error("inserted request is not found!");
+  error.status = 404;
+  next(error);
+});
+
+app.use((error, req, res, next) => {
+  res.status(error.status || 500).json({ Error: error.message });
+});
 
 const server = {
   host: "http://localhost",

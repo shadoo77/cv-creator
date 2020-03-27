@@ -1,12 +1,14 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
+// Config
+import { userService } from "../../services/user";
 // Material UI
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 // Import logo
 import siteLogo from "../../assets/logo.png";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1
   },
@@ -23,6 +25,7 @@ const LinkBehavior = React.forwardRef((props, ref) => (
 
 export default () => {
   const classes = useStyles();
+  const user = userService.getCurrentUser();
 
   return (
     <div className={classes.root}>
@@ -38,31 +41,39 @@ export default () => {
             <img src={siteLogo} alt="logo" className={classes.logo} />
           </RouterLink>
         </Box>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box mx={2}>
-            <Button
-              color="primary"
-              size="medium"
-              to="/login"
-              component={LinkBehavior}
-              className={classes.buttonStyle}
-            >
-              Login
-            </Button>
+        {user ? (
+          <span>hey {user.firstName + " " + user.lastName}!</span>
+        ) : (
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Box mx={2}>
+              <Button
+                color="primary"
+                size="medium"
+                to="/login"
+                component={LinkBehavior}
+                className={classes.buttonStyle}
+              >
+                Login
+              </Button>
+            </Box>
+            <Box mx={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                to="/register"
+                component={LinkBehavior}
+                size="large"
+                className={classes.buttonStyle}
+              >
+                Sign up
+              </Button>
+            </Box>
           </Box>
-          <Box mx={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              to="/register"
-              component={LinkBehavior}
-              size="large"
-              className={classes.buttonStyle}
-            >
-              Sign up
-            </Button>
-          </Box>
-        </Box>
+        )}
       </Box>
     </div>
   );

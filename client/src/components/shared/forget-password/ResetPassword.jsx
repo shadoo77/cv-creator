@@ -88,7 +88,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 export default props => {
-  console.log(props);
   const classes = useStyles();
   const [currState, setCurrState] = useState({
     id: "",
@@ -100,14 +99,13 @@ export default props => {
     loading: false
   });
 
-  const tesst = async () => {
+  const checkLinkExpire = async () => {
     try {
-      const results = await axios.get(`api/account/reset-password`, {
+      const results = await axios.get(`/api/account/reset-password`, {
         params: {
           resetPasswordToken: props.match.params.pass_token
         }
       });
-
       setCurrState({
         ...currState,
         id: results.data.userID,
@@ -121,7 +119,7 @@ export default props => {
   };
 
   useEffect(() => {
-    //tesst();
+    checkLinkExpire();
   }, []);
 
   const handleChange = e => {
@@ -134,7 +132,8 @@ export default props => {
     setCurrState({ ...currState, loading: true });
     const newPass = { id, newPassword, confirmNewPassword };
     try {
-      const results = await axios.post(`api/account/reset-password`, newPass);
+      const results = await axios.post(`/api/account/reset-password`, newPass);
+      console.log(results);
       setCurrState({
         ...currState,
         newPassword: "",
@@ -143,9 +142,9 @@ export default props => {
         loading: false,
         errors: {}
       });
-      setTimeout(() => {
-        props.history.push("/login");
-      }, 3000);
+      // setTimeout(() => {
+      //   props.history.push("/login");
+      // }, 3000);
     } catch (err) {
       setCurrState({
         ...currState,

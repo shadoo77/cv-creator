@@ -92,7 +92,7 @@ const CollisionLink = React.forwardRef((props, ref) => (
 
 const initialState = {
   email: "anonymose434@gmail.com",
-  password: "sssssss",
+  password: "ssssssss",
   errors: {},
   loading: false
 };
