@@ -1,8 +1,16 @@
+# This is an example with only required properties:
 version: 2
 updates:
 - package-ecosystem: npm
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    time: "04:00"
+  open-pull-requests-limit: 10
+
+- package-ecosystem: npm
+  directory: "/client"
+  schedule:
+    interval: weekly
     time: "04:00"
   open-pull-requests-limit: 10
