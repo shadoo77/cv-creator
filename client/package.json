@@ -12,7 +12,7 @@
     "@testing-library/user-event": "^7.1.2",
     "axios": ">=0.21.1",
     "date-fns": "^2.9.0",
-    "jspdf": "^1.5.3",
+    "jspdf": ">=2.3.1",
     "jwt-decode": "^2.2.0",
     "notistack": "^0.9.7",
     "react": "^16.12.0",
